@@ -36,7 +36,7 @@ async function bootstrap() {
 
   // Register with Gateway (assuming Gateway listens on port 3003)
   try {
-     await axios.post('http://172.26.112.1:3003/discovery/register', {
+     await axios.post('http://localhost:3003/discovery/register', {
       nom: serviceName,
       host: host,
       port: port,

@@ -11,11 +11,14 @@ import { CreateResetePasswordDto } from './dto/create-resete-pasword.dto';
 import { IsEmail } from 'class-validator';
 import { CreateGoogleLoginDto } from './dto/create-googleLogin.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Any, Repository } from 'typeorm';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 import { Utilisateurs } from './entities/Utilisateurs.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/ligin-user.dto';
+import { permission } from 'process';
+import { Permissions } from '../permission/entities/permission.entity';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class AuthService {
@@ -26,6 +29,7 @@ export class AuthService {
     private readonly utilisateurRepository: Repository<Utilisateurs>,
     private tokenService : TokenService,
     private configService: ConfigService,
+    private roleService: RoleService
   ) {}
 
   async googleLogin(email: CreateGoogleLoginDto){
@@ -120,10 +124,10 @@ export class AuthService {
       console.log("user",users);
       
       const newUser = new  Utilisateurs()
-      newUser.password = users?.password;
-      newUser.name = users?.name;
-      newUser.email = users?.email
-      newUser.isAdmin = users?.isAdmin;
+      newUser.password = users.user?.password;
+      newUser.name = users?.user.name;
+      newUser.email = users?.user.email
+      newUser.isAdmin = users?.user.isAdmin;
       newUser.salt = await bcrypt.genSalt();
       const result = await this.utilisateurRepository.save(newUser)
       console.log(result);
@@ -219,10 +223,13 @@ export class AuthService {
     console.log("tokent:", token);
 
     try {
+      let permissionss 
       const result=  await this.tokenService.verifyToken(token)
       console.log("result:", result);
+
       
-      return result
+      
+      return permissionss
     } catch (error) {
       throw  new HttpException(error,HttpStatus.BAD_REQUEST)
     }

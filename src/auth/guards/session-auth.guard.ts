@@ -1,19 +1,19 @@
-// import {
-//   CanActivate,
-//   ExecutionContext,
-//   Injectable,
-//   UnauthorizedException,
-// } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
-// @Injectable()
-// export class SessionAuthGuard implements CanActivate {
-//   async canActivate(context: ExecutionContext) {
-//     const request = context.switchToHttp().getRequest();
+@Injectable()
+export class SessionAuthGuard implements CanActivate {
+  async canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
     
-//     if (request.isAuthenticated()) {
-//       return true;
-//     } else {
-//       throw new UnauthorizedException(['unauthorized']);
-//     }
-//   }
-// }
+    if (request.isAuthenticated()) {
+      return true;
+    } else {
+      throw new UnauthorizedException(['unauthorized']);
+    }
+  }
+}

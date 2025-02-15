@@ -18,6 +18,7 @@ import { EntityLoader } from 'src/casl/entity-loader.service';
 import { Roles } from 'src/role/entities/roles.entity';
 import { Permissions } from 'src/permission/entities/permission.entity';
 import { PermissionService } from 'src/permission/permission.service';
+import { RoleService } from '../role/role.service';
 
 
 @Module({
@@ -46,7 +47,8 @@ import { PermissionService } from 'src/permission/permission.service';
     JwtRefreshStrategy,
     CaslAbilityFactory,
     EntityLoader,
-    PermissionService
+    PermissionService,
+    RoleService
   ],
 
 })

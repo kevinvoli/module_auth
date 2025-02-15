@@ -11,7 +11,8 @@ import { log } from 'console';
 import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Payload } from '@nestjs/microservices';
-// import { Role } from '../../../module_gateway/src/utils/roles.decorator';
+import { RoleService } from 'src/role/role.service';
+import { PermissionService } from 'src/permission/permission.service';
 
 @Injectable()
 export class TokenService{
@@ -96,14 +97,10 @@ export class TokenService{
 
   async verifyToken(token){
     try {
-      console.log("verification");
       
       const confirmation= await this.jwtService.verify(token,{
         secret: this.configService.get('SECRET'),
-      })
-      console.log("verification",confirmation);
-      
-      
+      })   
       return confirmation
     } catch (error) {
       throw  new HttpException(error,HttpStatus.BAD_REQUEST)

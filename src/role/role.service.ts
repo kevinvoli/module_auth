@@ -4,6 +4,7 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Roles } from './entities/roles.entity';
 import { Repository } from 'typeorm';
+import { permission } from 'process';
 
 @Injectable()
 export class RoleService {
@@ -30,8 +31,22 @@ export class RoleService {
     }  
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} role`;
+  async findOne(id: number) {
+    console.log("id role:", id);
+    try {
+      return await this.rolesRepository.findOne({
+        where:{
+          id: id
+        },
+        relations:{permissions:true}
+        
+      })
+    } catch (error) {
+      console.log("error role:", error);
+      
+      return error
+    }
+    
   }
 
   update(id: number, updateRoleDto: UpdateRoleDto) {

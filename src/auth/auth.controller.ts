@@ -10,6 +10,7 @@ import { PoliciesGuard } from 'src/casl/guards/policies.guard';
 import { CheckPolicies } from 'src/casl/decorators/policies.decorator';
 import { Action } from 'src/permission/entities/permission.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { log } from 'console';
 
 
   @Controller('auth')
@@ -111,7 +112,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
   
 
     @UseInterceptors(ClassSerializerInterceptor)
-    @UseGuards(JwtAuthGuard,PoliciesGuard)
+    @UseGuards(JwtAuthGuard)
     @CheckPolicies(
        (ability) => ability.can(Action.Read, 'Utilisateurs'),
       (ability) => ability.can(Action.Create, 'Utilisateurs'),
@@ -124,22 +125,20 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
       return req?.user
     }
 
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @UseGuards(JwtAuthGuard)
     @MessagePattern({cmd:'validate_token'})
-    async validateToken(@Payload() token: {token:string}) {      
-      return await this.authService.validateToken(token.token);
+    async validateToken(@Payload() data: any) {  
+      try {
+        console.log("les data", data);
+      
+      return data.user;
+      } catch (error) {
+      console.log("les error:",error);
+        return error
+      }    
     }
     
   }
-
-
-
-  // @MessagePattern('updateAuth')
-  // update(@Payload() updateAuthDto: UpdateAuthDto) {
-  //   return this.authService.update(updateAuthDto.id, updateAuthDto);
-  // }
-
-  // @MessagePattern('removeAuth')
-  // remove(@Payload() id: number) {
-  //   return this.authService.remove(id);
-  // }
 
