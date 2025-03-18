@@ -60,7 +60,6 @@ export class AuthService {
     const {email, password,name} = createUserDto
     try { 
       const token = await this.tokenService.confirmationToken(createUserDto)  
-      console.log("le token",token);
       
       return token
     } catch (error) {
@@ -91,7 +90,7 @@ export class AuthService {
         role:true
       }
       })
-      console.log("ici mon token:",users)
+      console.log("ici mon user:",users)
       
       if(users && await users.validatePassword(password, users.password)){
         const payload = { email: users.email, id:users?.id, name:users.name, roleId: users.role?.id ? users.role.id :  0  } 
@@ -107,7 +106,7 @@ export class AuthService {
       newToken.userId = payload.id
       const token= await this.tokenService.updateRefreshTokenInUser(newToken, payload.id)
       console.log("ici mon token:",{token:accessToken,user:payload})
-      return token
+      return {token:accessToken,user:payload}
       }
       throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     } catch (error) {
@@ -121,22 +120,24 @@ export class AuthService {
   async mailConfirmation(token:string){
     try {
       const users =  await this.tokenService.verifyToken(token)
-      console.log("user",users);
+      console.log("user test",users);
       
       const newUser = new  Utilisateurs()
-      newUser.password = users.user?.password;
-      newUser.name = users?.user.name;
-      newUser.email = users?.user.email
-      newUser.isAdmin = users?.user.isAdmin;
+      newUser.password = users.password;
+      newUser.name = users.name;
+      newUser.email = users.email
+      newUser.isAdmin = users?.isAdmin;
       newUser.salt = await bcrypt.genSalt();
       const result = await this.utilisateurRepository.save(newUser)
       console.log(result);
       return result
 
     } catch (error) {
-      console.log("erruooscdvf=",error);
-      
-      throw new ExceptionsHandler(error);
+      console.log("erruooscdvf=",error.code);
+      if (error.code === 'ER_DUP_ENTRY') {
+        throw new ConflictException('Cet email est déjà utilisé');
+      }
+      throw new Error(error)
     }
   }
 

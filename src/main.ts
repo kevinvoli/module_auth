@@ -5,7 +5,8 @@ import axios from 'axios';
 import * as net from 'net';
 import * as os from 'os'
 import { ValidationPipe } from '@nestjs/common';
-import { TransformationInterceptor } from './responseInterceptor';
+import { RpcExceptionFilter } from './utils/rpc-exception.filter';
+// import { TransformationInterceptor } from './responseInterceptor';
 
 
 function getLocalIPAddress(): string {
@@ -60,7 +61,7 @@ async function bootstrap() {
 
 
   appHttp.enableCors(corsOption);
-  appHttp.useGlobalInterceptors(new TransformationInterceptor())
+  // appHttp.useGlobalInterceptors(new TransformationInterceptor())
 
   appHttp.useGlobalPipes( new ValidationPipe({
     transform: true, // Cela transforme les objets bruts en instances de DTO
@@ -68,6 +69,7 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
 
   }));
+  // app.useGlobalFilters(new RpcExceptionFilter());
   await appHttp.listen(3014);
 
    app.listen();

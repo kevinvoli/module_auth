@@ -1,16 +1,14 @@
-import { Body, ClassSerializerInterceptor, Controller, Post, Res, UseGuards, UseInterceptors,Request, Get, Param, Delete, Query } from '@nestjs/common';
-import { MessagePattern, Payload } from '@nestjs/microservices';
+import { Body, ClassSerializerInterceptor, Controller, Post, Res, UseGuards, UseInterceptors,Request, Get, Param, Delete, Query, ConflictException, NotFoundException } from '@nestjs/common';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { LoginUserDto } from './dto/ligin-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateResetePasswordDto } from './dto/create-resete-pasword.dto';
-import { PoliciesGuard } from 'src/casl/guards/policies.guard';
 import { CheckPolicies } from 'src/casl/decorators/policies.decorator';
 import { Action } from 'src/permission/entities/permission.entity';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { log } from 'console';
 
 
   @Controller('auth')
@@ -35,17 +33,21 @@ import { log } from 'console';
         const result= await this.authService.login(user);
         console.log("result connexion:",result);
 
-        return result
+        return {token: result.token, status:200, user: result.user}
       }
       
     @MessagePattern({cmd: 'create_auth'})
     async registerUser(data:CreateUserDto) {
-      console.log("ceate ok", data);
-      const idRole:number=1
-      const result= await this.authService.create(data,idRole);
-      console.log("debut de la connexion:",result);
-
-      return result
+      try {
+        console.log("ceate ok", data);
+        const idRole:number=1
+        const result= await this.authService.create(data,idRole);
+  
+        return result
+      } catch (error) {
+        return error
+      }
+     
     }
    
   
@@ -61,18 +63,18 @@ import { log } from 'console';
     }
   
   
-    @Get('confirmation/:token')
-    async  mailconfirmation(@Param('token')token:string){
-      try {
-        console.log(token);
-        const confirmation = await this.authService.mailConfirmation(token)
-        console.log(confirmation);
-        return confirmation
-      } catch (error) {
-        throw new Error(error)
-      }
+    // @Get('confirmation/:token')
+    // async  mailconfirmation(@Param('token')token:string){
+    //   try {
+    //     console.log(token);
+    //     const confirmation = await this.authService.mailConfirmation(token)
+    //     console.log(confirmation);
+    //     return confirmation
+    //   } catch (error) {
+    //     throw new Error(error)
+    //   }
      
-    }
+    // }
 
     @MessagePattern({cmd: 'confirmation_auth'})
     async mailConfirmation(data:any) {
@@ -85,8 +87,12 @@ import { log } from 'console';
 
       return result
       } catch (error) {
-        throw new Error(error)
-        
+        if (error.status === 409) {
+    
+        throw new RpcException(new ConflictException('Cet email est déjà utilisé'));
+        }
+      
+        throw new Error(error.response)
       }
       
     }
