@@ -1,16 +1,16 @@
 import { IsBoolean, IsEmail, IsNotEmpty, IsString, Length } from "class-validator";
+import { Action } from "../entities/permission.entity";
 
 export class CreatePermissionDto {
   @IsNotEmpty()
-  action: string;
+  action: Action;
 
   @IsNotEmpty()
-  resource: string;
+  module: string;
 
   @IsNotEmpty()
-  conditions: Record<string, any>;
-  
-  isAdmin: boolean | null; 
+  conditions?: Record<string, any>;
+
 }
 
 

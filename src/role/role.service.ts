@@ -1,10 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Roles } from './entities/roles.entity';
 import { Repository } from 'typeorm';
-import { permission } from 'process';
+import { Permissions } from 'src/permission/entities/permission.entity';
+import { AssignPermissionsDto } from './dto/asignePermissionsDto';
 
 @Injectable()
 export class RoleService {
@@ -12,17 +13,27 @@ export class RoleService {
   constructor(
     @InjectRepository(Roles)
     private readonly rolesRepository: Repository<Roles>,
+    @InjectRepository(Permissions)
+    private readonly permissionRepository: Repository<Permissions>,
   ){}
 
 
-  create(createRoleDto: CreateRoleDto) {
-    return 'This action adds a new role';
+  async create(createRoleDto: CreateRoleDto) {
+    try {
+      const exists = await this.rolesRepository.findOne({ where: { nom:createRoleDto.name } });
+      if (exists) throw new BadRequestException('Ce rôle existe déjà');
+  
+      const role = this.rolesRepository.create(createRoleDto);
+      return this.rolesRepository.save(role);
+    } catch (error) {
+      
+    }
   }
 
   async findAll() {
     try {
       const ligne = await this.rolesRepository.find({
-       
+       relations:{permissions:true}
       })
       return ligne
     } catch (error) {
@@ -34,13 +45,9 @@ export class RoleService {
   async findOne(id: number) {
     console.log("id role:", id);
     try {
-      return await this.rolesRepository.findOne({
-        where:{
-          id: id
-        },
-        relations:{permissions:true}
-        
-      })
+      const role= await this.rolesRepository.findOne({where:{id: id},relations:{permissions:true}})
+      if (!role) throw new NotFoundException('Rôle non trouvé');
+      return role
     } catch (error) {
       console.log("error role:", error);
       
@@ -49,11 +56,54 @@ export class RoleService {
     
   }
 
-  update(id: number, updateRoleDto: UpdateRoleDto) {
-    return `This action updates a #${id} role`;
+  async update(id: number, updateRoleDto: UpdateRoleDto) {
+    try {
+      const categorie = await this.rolesRepository.findOne({
+        where:{id:id}
+      })
+      if(!categorie) throw new NotFoundException('categorie')
+      Object.assign(categorie, updateRoleDto)
+      return await this.rolesRepository.save(categorie)
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} role`;
+  async remove(id: number) {
+    try {
+      const categorie = await this.rolesRepository.findOne({
+        where: {id}
+      });
+      if(!categorie) throw new NotFoundException('user' );
+  
+      await this.rolesRepository.delete({id});
+      return true
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
   }
+
+  async assignPermissions(roleId: number, dto: AssignPermissionsDto) {
+    const role = await this.rolesRepository.findOne({ where: { id: roleId }, relations: ['permissions'] });
+    if (!role) throw new NotFoundException('Rôle introuvable');
+
+    const permissions = await this.permissionRepository.findByIds(dto.permissionIds);
+    role.permissions = permissions;
+
+    return this.rolesRepository.save(role);
+  }
+
+  async findByRoleId(roleId: number): Promise<Permissions[]> {
+    const role = await this.rolesRepository.findOne({
+      where: { id: roleId },
+      relations: ['permissions'],
+    });
+  
+    if (!role) {
+      throw new NotFoundException('Rôle non trouvé');
+    }
+  
+    return role.permissions;
+  }
+  
 }

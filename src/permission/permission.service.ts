@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePermissionDto } from './dto/create-permission.dto';
 import { UpdatePermissionDto } from './dto/update-permission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,14 +14,31 @@ export class PermissionService {
   ){}
 
 
-  create(createPermissionDto: CreatePermissionDto) {
-    return 'This action adds a new permission';
+  async create(createPermissionDto: CreatePermissionDto) {
+    try {
+      const exists = await this.permissionRepository.findOne({ where: { module: createPermissionDto.module, action:createPermissionDto.action } });
+      if (exists) throw new BadRequestException('Permission déjà existante');
+      const data = new Permissions
+      data.action = createPermissionDto.action
+      data.conditions = createPermissionDto.conditions
+      data.module = createPermissionDto.module
+  
+      const permission = this.permissionRepository.create(createPermissionDto);
+      return await this.permissionRepository.save(permission);
+    } catch (error) {
+      console.log(error.code);
+      if(error.code =="ER_DUP_ENTRY"){
+        throw new HttpException('ce nom existe déjà',HttpStatus.BAD_REQUEST)
+      }
+      throw error
+      
+    }
   }
 
   async findAll() {
     try {
       const ligne = await this.permissionRepository.find({
-       
+       relations:{roles:true}
       })
       return ligne
     } catch (error) {
@@ -29,34 +46,51 @@ export class PermissionService {
 
     }
   }
+ 
 
-  async findAllRole(roleId:number) {
-    console.log("les permission blezlbl:", roleId);
-
+  async findOne(id: number) {
     try {
-      const permission = await this.permissionRepository.find({
-       where: {
-        roleId:roleId
-       }
-      })
-      console.log("les permission blezlbl:", permission);
-      
+      const permission = await this.permissionRepository.findOne({ where: { id }, relations: ['roles'] });
+    if (!permission) throw new NotFoundException('Permission introuvable');
+    return permission;
       return permission
     } catch (error) {
-      throw new HttpException("echec de l'optention des permission", HttpStatus.NOT_FOUND)
-
+      throw new NotFoundException(error)
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} permission`;
+  async findByRoleId(roleId: number) {
+    const permissions = await this.permissionRepository.find({
+      where: { roles: { id: roleId } },
+      relations: ['role'],
+    });
+    return permissions.map((p) => p.action);
+  }
+  async update(id: number, updatePermissionDto: UpdatePermissionDto) {
+    try {
+      const categorie = await this.permissionRepository.findOne({
+        where:{id:id}
+      })
+      if(!categorie) throw new NotFoundException('categorie')
+      Object.assign(categorie, updatePermissionDto)
+      return await this.permissionRepository.save(categorie)
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
   }
 
-  update(id: number, updatePermissionDto: UpdatePermissionDto) {
-    return `This action updates a #${id} permission`;
+  async  remove(id: number) {
+    try {
+      const categorie = await this.permissionRepository.findOne({
+        where: {id}
+      });
+      if(!categorie) throw new NotFoundException('user' );
+  
+      await this.permissionRepository.remove(categorie);
+      return true
+    } catch (error) {
+      throw new NotFoundException(error)
+    }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} permission`;
-  }
+  
 }

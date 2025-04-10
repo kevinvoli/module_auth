@@ -1,6 +1,6 @@
 import { Utilisateurs } from "src/auth/entities/Utilisateurs.entity";
 import { Permissions } from "src/permission/entities/permission.entity";
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinTable, ManyToMany, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity("roles", { schema: "gestion_stock" })
 export class Roles {
@@ -22,8 +22,14 @@ export class Roles {
   @DeleteDateColumn({type:'datetime', name: 'delected_at'})
   delectedAt:Date;
 
-  @OneToMany(() => Permissions, (permissions) => permissions)
+  @ManyToMany(() => Permissions, (permission) => permission.roles, { cascade: true })
+  @JoinTable({
+    name:'role-permission',
+    joinColumn:{name:'roles_id', referencedColumnName:'id'},
+    inverseJoinColumn:{name:'permission_id',referencedColumnName:'id'}
+  })
   permissions: Permissions[];
+ 
 
   @OneToMany(() => Utilisateurs, (utilisateurs) => utilisateurs.role)
   utilisateurs: Utilisateurs[];

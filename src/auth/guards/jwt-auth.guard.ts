@@ -7,13 +7,15 @@ import { RpcException } from '@nestjs/microservices';
 import { TokenService } from '../jwt.service';
 import { PermissionService } from 'src/permission/permission.service';
 import { permission } from 'process';
+import { RoleService } from 'src/role/role.service';
 
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
   constructor(
-    private reflector: Reflector, private jwtService: TokenService,
-    private permissionService: PermissionService,
+    private reflector: Reflector, 
+    private jwtService: TokenService,
+    private roleService: RoleService,
   ) {
     super();
   }
@@ -27,6 +29,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       ]);
   
       if (isPublic) return true;
+      
       const data = context.switchToRpc().getData();
       const token = data?.token;
       
@@ -39,14 +42,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         let permissionss
     
         if (decoded?.roleId || decoded?.roleId!=0 ) {
-          permissionss = await this.permissionService.findAllRole(decoded?.roleId)
+          permissionss = await this.roleService.findByRoleId(decoded?.roleId)
         }
         const result= {
           user: decoded,
           permission:permissionss
         }
       // Retourner un nouvel objet contenant `user` dans les données
+      console.log("mon contextde arg:", context.getArgs());
+
       context.getArgs()[0] = { ...data, user: result };
+      console.log("mon contextde arg:", context.getArgs());
+      
         return true;
       } catch (error) {
         if (error.name === 'TokenExpiredError') {

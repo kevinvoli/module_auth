@@ -8,6 +8,7 @@ import * as Joi from '@hapi/joi';
 import { CaslModule } from './casl/casl.module';
 import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -21,7 +22,7 @@ import { PermissionModule } from './permission/permission.module';
     })
   }),
     AuthModule, 
-    DatabaseModule, CaslModule, RoleModule, PermissionModule
+    DatabaseModule, CaslModule, RoleModule, PermissionModule, UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],

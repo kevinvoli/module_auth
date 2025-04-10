@@ -5,13 +5,14 @@ import { PolicyHandler } from '../interface/policies.interface';
 import { CHECK_POLICIES_KEY } from '../decorators/policies.decorator';
 import { CaslAbilityFactory } from '../casl-ability.factory';
 import { PermissionService } from 'src/permission/permission.service';
+import { RoleService } from '../../role/role.service';
 
 @Injectable()
 export class PoliciesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory,
-    private readonly permissionServcie: PermissionService 
+    private readonly rolesServcie: RoleService 
 
   ) {}
 
@@ -26,14 +27,16 @@ export class PoliciesGuard implements CanActivate {
     // console.log("les user", request.user);
     
     const user = request.user;
+    console.log(`azertyuikjhgvcx   result:`, request);
+
 
     if (!user) {
       throw new ForbiddenException("L'utilisateur n'est pas authentifié");
     }
     
-    console.log(`azertyuikjhgvcx   result:`, user?.roleId);
+  
     
-    const permissions = await this.permissionServcie.findAllRole(user?.roleId)
+    const permissions = await this.rolesServcie.findByRoleId(user?.roleId)
     // Créer les permissions pour l'utilisateur
     console.log(`Permision   result:dzzsd`, permissions);
     
@@ -45,7 +48,7 @@ export class PoliciesGuard implements CanActivate {
       const result = handler(ability);
       console.log(`Handler ${index} result:`, result);
     });
-    console.log("every handler: ", handlers.every((handler) => handler(ability)));
+
     
     // Vérifier les permissions en utilisant les handlers
     return handlers.every((handler) => handler(ability));

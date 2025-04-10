@@ -6,18 +6,14 @@ import { TokenService } from './jwt.service';
 
 import * as speakeasy from 'speakeasy'
 import { ConfigService } from '@nestjs/config';
-import { log } from 'console';
 import { CreateResetePasswordDto } from './dto/create-resete-pasword.dto';
-import { IsEmail } from 'class-validator';
 import { CreateGoogleLoginDto } from './dto/create-googleLogin.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Any, Repository } from 'typeorm';
-import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 import { Utilisateurs } from './entities/Utilisateurs.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/ligin-user.dto';
-import { permission } from 'process';
-import { Permissions } from '../permission/entities/permission.entity';
+
 import { RoleService } from '../role/role.service';
 
 @Injectable()
