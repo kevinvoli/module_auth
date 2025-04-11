@@ -32,7 +32,7 @@ export class RoleService {
 
   async findAll() {
     try {
-      const ligne = await this.rolesRepository.find({
+      const ligne = await this.rolesRepository. find({
        relations:{permissions:true}
       })
       return ligne
@@ -90,7 +90,7 @@ export class RoleService {
     const permissions = await this.permissionRepository.findByIds(dto.permissionIds);
     role.permissions = permissions;
 
-    return this.rolesRepository.save(role);
+    return await this.rolesRepository.save(role);
   }
 
   async findByRoleId(roleId: number): Promise<Permissions[]> {

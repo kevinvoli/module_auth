@@ -1,37 +1,71 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards, ValidationPipe, UsePipes } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { AssignPermissionsDto } from './dto/asignePermissionsDto';
+import { CheckPolicies } from 'src/casl/decorators/policies.decorator';
+import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { Action } from 'src/casl/entities/permission.entity';
+import { PoliciesGuard } from 'src/casl/guards/policies.guard';
 
 @Controller('role')
+@UsePipes(new ValidationPipe({
+  whitelist:true,
+  exceptionFactory: (errors) =>{
+  return new RpcException(errors);
+}
+}
+))
+@UseGuards(PoliciesGuard) 
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
 
-  @Post()
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.roleService.create(createRoleDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.roleService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.roleService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id',ParseIntPipe) id: number, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.roleService.update(id, updateRoleDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.roleService.remove(+id);
-  }
+  
+    @CheckPolicies(
+      (ability) => ability.can(Action.Read, 'roles'),
+      (ability) => ability.can(Action.Create, 'roles'),
+    )
+    @MessagePattern({cmd:'create_roles'})
+    create(@Payload() createUserDto: CreateRoleDto) {
+      return this.roleService.create(createUserDto);
+    }
+  
+  
+    @CheckPolicies(
+      (ability) => ability.can(Action.Read, 'roles')
+    )
+    @MessagePattern({cmd:'findAll_roles'})
+    findAll() {
+      return this.roleService.findAll();
+    }
+  
+    @CheckPolicies(
+      (ability) => ability.can(Action.Read, 'roles')
+    )
+    @MessagePattern({cmd:'findOne_roles'})
+    findOne(@Payload() data: any) {
+      console.log("==================================================",data);
+      
+      return this.roleService.findOne(data);
+    }
+  
+    @CheckPolicies(
+      (ability) => ability.can(Action.Read, 'roles'),
+      (ability) => ability.can(Action.Update, 'roles')
+    )
+    @MessagePattern({cmd:'update_roles'})
+    update(@Payload() updateUserDto: UpdateRoleDto) {
+      return this.roleService.update(updateUserDto.id, updateUserDto);
+    }
+  
+    @CheckPolicies(
+      (ability) => ability.can(Action.Read, 'roles'),
+      (ability) => ability.can(Action.Delete, 'roles'),
+    )
+    @MessagePattern({cmd:'remove_roles'})
+    remove(@Payload() id: number) {
+      return this.roleService.remove(id);
+    }
 
   @Post(':id/permissions')
   assignPermissions(

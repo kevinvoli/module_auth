@@ -1,12 +1,18 @@
-import { Injectable } from '@nestjs/common';
-import { Connection } from 'typeorm';
+import { Injectable, Logger } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class EntityLoader {
-  constructor(private connection: Connection) {}
+  private readonly logger = new Logger(EntityLoader.name);
 
-  // Charge les entités dynamiquement
+  constructor(private dataSource: DataSource) {}
+
   getAllEntities(): string[] {
-    return this.connection.entityMetadatas.map((meta) => meta.name);
+    const entities = this.dataSource.entityMetadatas.map((meta) => meta.name);
+    
+    // Log des entités
+    this.logger.log(`Entités chargées : ${entities.join(', ')}`);
+
+    return entities;
   }
 }

@@ -6,6 +6,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { Utilisateurs } from './entities/user.entity';
 import { Roles } from 'src/role/entities/roles.entity';
+import { CaslAbilityFactory } from 'src/casl/casl-ability.factory';
+import { EntityLoader } from 'src/casl/entity-loader.service';
 
 @Module({
    imports: [
@@ -21,6 +23,10 @@ import { Roles } from 'src/role/entities/roles.entity';
       })
     ],
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [
+    UsersService,
+    CaslAbilityFactory,
+    EntityLoader
+  ],
 })
 export class UsersModule {}

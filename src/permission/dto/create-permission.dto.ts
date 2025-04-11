@@ -9,7 +9,7 @@ export class CreatePermissionDto {
   module: string;
 
   @IsNotEmpty()
-  conditions?: Record<string, any>;
+  conditions?: string;
 
 }
 

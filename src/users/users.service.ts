@@ -50,6 +50,7 @@ export class UsersService {
           role:true
         }
       })
+      users.map(user=> {delete user.password,delete user.salt})
       return users
     } catch (error) {
       throw new  NotFoundException("utilisateur non trouve")

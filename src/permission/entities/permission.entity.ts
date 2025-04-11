@@ -1,3 +1,4 @@
+import { Ressources } from "src/ressource/entities/ressource.entity";
 import { Roles } from "src/role/entities/roles.entity";
 import {
   Column,
@@ -21,17 +22,26 @@ export enum Action {
 export class Permissions {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
   id: number;
+  @Column("varchar", { name: "nom", nullable: false, length: 50 })
+  nom: string ;
 
-  @Column("varchar", { name: "module", nullable: false, length: 50 })
+  @Column("varchar", { name: "ressourceName", nullable: false, length: 50 })
   module: string ;
 
   @Column({type:"enum", enum: Action, nullable: false, default: Action.Read, enumName: 'action_enum'})
   action: Action;
 
-  @Column({ type: 'json', nullable: true })
-  conditions: Record<string, any>;
+  @Column({ type: 'text', nullable: true })
+  conditions: string;
 
   @ManyToMany(() => Roles, (role) => role.permissions)
   roles: Roles[];
+  
+  @ManyToOne(() => Ressources, (ressource) => ressource.permission, {
+    onDelete: "CASCADE",
+    onUpdate: "RESTRICT",
+  })
+  @JoinColumn([{ name: "ressourceName", referencedColumnName: "nom" }])
+  ressource: Ressources;
   
 }
