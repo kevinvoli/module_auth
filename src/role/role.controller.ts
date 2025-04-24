@@ -43,10 +43,9 @@ export class RoleController {
       (ability) => ability.can(Action.Read, 'roles')
     )
     @MessagePattern({cmd:'findOne_roles'})
-    findOne(@Payload() data: any) {
-      console.log("==================================================",data);
+    async findOne(@Payload() data: any) {
       
-      return this.roleService.findOne(data);
+      return await this.roleService.findOne(data);
     }
   
     @CheckPolicies(
@@ -54,8 +53,8 @@ export class RoleController {
       (ability) => ability.can(Action.Update, 'roles')
     )
     @MessagePattern({cmd:'update_roles'})
-    update(@Payload() updateUserDto: UpdateRoleDto) {
-      return this.roleService.update(updateUserDto.id, updateUserDto);
+    async update(@Payload() updateUserDto: UpdateRoleDto) {
+      return await this.roleService.update(updateUserDto.id, updateUserDto);
     }
   
     @CheckPolicies(
@@ -67,11 +66,12 @@ export class RoleController {
       return this.roleService.remove(id);
     }
 
-  @Post(':id/permissions')
-  assignPermissions(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: AssignPermissionsDto,
-  ) {
-    return this.roleService.assignPermissions(id, dto);
-  }
+
+
+
+
+
+
+
+
 }

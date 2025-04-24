@@ -25,7 +25,7 @@ export class PoliciesGuard implements CanActivate {
     const request = context.switchToRpc().getData();
     // console.log("les user", request.user);
     const {permission,user} = request.user
-  
+      console.log("les permision",  context.switchToRpc().getData());
      
       
 
@@ -36,12 +36,13 @@ export class PoliciesGuard implements CanActivate {
     const ability = await this.caslAbilityFactory.createForUser(permission);
     handlers.forEach((handler, index) => {
       const result = handler(ability);
-    console.log("mon contextde arg:", result);
-
+      console.log("result:",result);
+      
     });
-    console.log("***************************************************************", context.switchToRpc().getData());
+  
     context.getArgs()[0] =typeof request.data=== "object"? {...request.data }: request.data
-    console.log("mon contextde arg:", context.switchToRpc().getData());
+   
+    
     // Vérifier les permissions en utilisant les handlers
     return handlers.every((handler) => handler(ability));
   }

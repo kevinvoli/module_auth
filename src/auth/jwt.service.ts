@@ -23,7 +23,6 @@ export class TokenService{
     private configService: ConfigService,
   ){}  
   async confirmationToken(data:CreateUserDto){
-    console.log("mes date user",data);
     
     const Payload= {
       email: data.email,

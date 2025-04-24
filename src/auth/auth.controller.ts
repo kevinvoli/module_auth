@@ -21,17 +21,14 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     async register(@Body() createAuthDto: CreateUserDto, idRole:number=1) {
       
       const users= await this.authService.create(createAuthDto, idRole);
-      console.log('moi aaussi',createAuthDto);
   
       return users
     }
 
     @MessagePattern({cmd: 'login_auth'})
       async login(@Payload() user: LoginUserDto) {
-        console.log("debut de la connexion:",user);
         
         const result= await this.authService.login(user);
-        console.log("result connexion:",result);
 
         return {token: result.token, status:200, user: result.user}
       }
@@ -39,7 +36,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     @MessagePattern({cmd: 'create_auth'})
     async registerUser(data:CreateUserDto) {
       try {
-        console.log("ceate ok", data);
         const idRole:number=1
         const result= await this.authService.create(data,idRole);
   
@@ -58,7 +54,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
       respons.clearCookie('jwt')
       
       const result= await this.authService.localLogout(req.user)
-      console.log("cococococococococococococococococococococo", result);
       return result
     }
   
@@ -80,10 +75,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     async mailConfirmation(data:any) {
       try {
         const token = data.tokens
-        console.log("mes token",token);
         
         const result= await this.authService.mailConfirmation(token);
-      console.log("debut de la connexion:",result);
 
       return result
       } catch (error) {
@@ -100,7 +93,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     @Post('resete-password')
     async resetePassword(@Body()user:UpdateUserDto, @Res({passthrough:true}) respons:Response){
       respons.clearCookie('jwt')
-      console.log("cococococococococococococococococococococo");
       const result= await this.authService.resetPasswordDemand(user.email)
       return result
     }
@@ -108,10 +100,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     @Post('reset-password-confirmation')
     async resetePasswordConfirm(@Body()code:CreateResetePasswordDto, @Res({passthrough:true}) respons:Response){
       respons.clearCookie('jwt')
-      console.log("cococococococococococococococococococococo");
       
       const result= await this.authService.resetPasswordComfirmation(code)
-      console.log("cococococococococococococococococococococo", result);
   
       return result
     }
@@ -126,7 +116,6 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     )
     @Delete('delete')
     async deleteAccount(@Request()  req,){
-      console.log("ma request", req.user);
       
       return req?.user
     }
@@ -137,11 +126,9 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
     @MessagePattern({cmd:'validate_token'})
     async validateToken(@Payload() data: any) {  
       try {
-        console.log("les data", data);
       
       return data.user;
       } catch (error) {
-      console.log("les error:",error);
         return error
       }    
     }

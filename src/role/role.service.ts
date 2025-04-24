@@ -3,9 +3,10 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Roles } from './entities/roles.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Permissions } from 'src/permission/entities/permission.entity';
 import { AssignPermissionsDto } from './dto/asignePermissionsDto';
+import { permission } from 'process';
 
 @Injectable()
 export class RoleService {
@@ -83,11 +84,11 @@ export class RoleService {
     }
   }
 
-  async assignPermissions(roleId: number, dto: AssignPermissionsDto) {
-    const role = await this.rolesRepository.findOne({ where: { id: roleId }, relations: ['permissions'] });
+  async assignPermissions(dto: AssignPermissionsDto) {
+    const role = await this.rolesRepository.findOne({ where: { id: +dto.id}, relations: ['permissions'] });
     if (!role) throw new NotFoundException('Rôle introuvable');
 
-    const permissions = await this.permissionRepository.findByIds(dto.permissionIds);
+    const permissions = await this.permissionRepository.findByIds(dto.permissions);
     role.permissions = permissions;
 
     return await this.rolesRepository.save(role);
@@ -105,5 +106,37 @@ export class RoleService {
   
     return role.permissions;
   }
+
+  async removePermissions(dto: AssignPermissionsDto) {
+    const role = await this.rolesRepository.findOne({
+      where: { id: +dto.id },
+      relations: ['permissions'],
+    });
+    if (!role) throw new NotFoundException('Rôle introuvable');
+  
+    role.permissions = role.permissions.filter(p => !dto.permissions.includes(p.id));
+    return await this.rolesRepository.save(role);
+  }
+
+  async addPermissions( dto: AssignPermissionsDto) {
+    const role = await this.rolesRepository.findOne({
+      where: { id: +dto.id },
+      relations: ['permissions'],
+    });
+    if (!role) throw new NotFoundException('Rôle introuvable');
+  
+    const newPermissions = await this.permissionRepository.findBy({id:In(dto.permissions)});
+  
+
+    if (!newPermissions) throw new NotFoundException('Rôle introuvable');
+
+    role.permissions = await newPermissions
+    // const existingIds = new Set(role.permissions.map(p => p.id));
+    // const permissionsToAdd = newPermissions.filter(p => !existingIds.has(p.id));
+  
+    // role.permissions = [...role.permissions, ...permissionsToAdd];
+    return await this.rolesRepository.save(role);
+  }
+  
   
 }

@@ -25,7 +25,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh-
 
     
     async validate(payload: PayloadInterface) {
-        console.log("user");
         
     const user = await this.userRepository.findOne({
           where:{

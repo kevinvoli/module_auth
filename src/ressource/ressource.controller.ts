@@ -29,8 +29,10 @@ export class RessourceController {
       (ability) => ability.can(Action.Read, 'ressources')
     )
   @MessagePattern({cmd:'findAll_ressources'})
-  findAll() {
-    return this.ressourceService.findAll();
+  async findAll() {
+    console.log("findAll_ressources");
+    
+    return await this.ressourceService.findAll();
   }
 
   @CheckPolicies(
@@ -38,6 +40,7 @@ export class RessourceController {
   )
   @MessagePattern({cmd:'findOne_ressources'})
   findOne(@Payload() data: number) {
+    console.log("mes ressource");
     return this.ressourceService.findOne(data);
   }
 

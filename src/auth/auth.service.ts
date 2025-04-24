@@ -45,7 +45,6 @@ export class AuthService {
     newToken.userId = payload.id
     await this.tokenRepository.save(newToken)
     const token= await this.tokenService.updateRefreshTokenInUser(newToken, payload.id)
-    console.log("oui ici",token)
     return {
       token:token,
       user:payload
@@ -86,7 +85,6 @@ export class AuthService {
         role:true
       }
       })
-      console.log("ici mon user:",users)
       
       if(users && await users.validatePassword(password, users.password)){
         const payload = { email: users.email, id:users?.id, name:users.name, roleId: users.role?.id ? users.role.id :  0  } 
@@ -101,12 +99,10 @@ export class AuthService {
       newToken.refreshToken= refreshToken
       newToken.userId = payload.id
       const token= await this.tokenService.updateRefreshTokenInUser(newToken, payload.id)
-      console.log("ici mon token:",{token:accessToken,user:payload})
       return {token:accessToken,user:payload}
       }
       throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
     } catch (error) {
-      console.log("ici mon erreur:",error)
 
       throw new NotFoundException(error.message)  
     }    
@@ -116,7 +112,6 @@ export class AuthService {
   async mailConfirmation(token:string){
     try {
       const users =  await this.tokenService.verifyToken(token)
-      console.log("user test",users);
       
       const newUser = new  Utilisateurs()
       newUser.password = users.password;
@@ -129,7 +124,6 @@ export class AuthService {
       return result
 
     } catch (error) {
-      console.log("erruooscdvf=",error.code);
       if (error.code === 'ER_DUP_ENTRY') {
         throw new ConflictException('Cet email est déjà utilisé');
       }
@@ -148,7 +142,6 @@ export class AuthService {
   token.accessToken= 'null';
 
   await this.tokenService.delete(token);
-  console.log("le token est ici",userId);
   return user
   } catch (error) {
     throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
@@ -202,13 +195,11 @@ export class AuthService {
 
   async findOne(userId){
     try {
-      console.log("mon utilisateur");
       
       const users= await this.utilisateurRepository.findOne({
         where:{id:userId},
         relations:{role:true}
       })
-      console.log("mon utilisateur");
       
       return users
     } catch (error) {
@@ -217,12 +208,10 @@ export class AuthService {
   }
 
   async validateToken(token:string) {
-    console.log("tokent:", token);
 
     try {
       let permissionss 
       const result=  await this.tokenService.verifyToken(token)
-      console.log("result:", result);
 
       
       

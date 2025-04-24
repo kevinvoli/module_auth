@@ -10,6 +10,7 @@ import { RoleModule } from './role/role.module';
 import { PermissionModule } from './permission/permission.module';
 import { UsersModule } from './users/users.module';
 import { RessourceModule } from './ressource/ressource.module';
+import { RolePermissionModule } from './role-permission/role-permission.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -23,7 +24,7 @@ import { RessourceModule } from './ressource/ressource.module';
     })
   }),
     AuthModule, 
-    DatabaseModule, CaslModule, RoleModule,RessourceModule, PermissionModule, UsersModule
+    DatabaseModule, CaslModule, RoleModule,RessourceModule, PermissionModule, UsersModule, RolePermissionModule
   ],
   controllers: [AppController],
   providers: [AppService],

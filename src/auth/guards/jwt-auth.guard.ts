@@ -49,10 +49,8 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
           permission:permissionss
         }
       // Retourner un nouvel objet contenant `user` dans les données
-      console.log("mon contextde arg:", context.getArgs());
 
       context.getArgs()[0] = { ...data, user: result };
-      console.log("mon contextde arg:", context.getArgs());
       
         return true;
       } catch (error) {
